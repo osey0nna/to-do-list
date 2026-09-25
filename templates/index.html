@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}To-Do List{% endblock %}
+
+{% block content %}
+<div class="app-card">
+
+    <header class="app-header">
+        <div class="app-title">
+            <span class="app-emoji">🍡</span>
+            <div>
+                <h1>Matcha &amp; Pink To-Do</h1>
+                <p class="subtitle">Rapikan harimu dengan manis ✨</p>
+            </div>
+        </div>
+
+        <a href="{{ url_for('download_project') }}" class="btn btn-download" title="Download seluruh source code project ini">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Project
+        </a>
+    </header>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash">
+                {% for m in messages %}<p>{{ m }}</p>{% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <section class="progress-section">
+        <div class="progress-info">
+            <span>{{ selesai }} / {{ total }} selesai</span>
+            <span>{{ persen }}%</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ persen }}%;"></div>
+        </div>
+    </section>
+
+    <form action="{{ url_for('add') }}" method="POST" class="add-form">
+        <input type="text" name="task" placeholder="Tulis tugas baru... contoh: minum teh matcha 🍵" autocomplete="off" required>
+
+        <div class="datepicker" data-datepicker>
+            <input type="hidden" name="due_date" value="">
+            <div class="dp-field">
+                <button type="button" class="dp-trigger" aria-haspopup="dialog" aria-expanded="false">
+                    <svg class="dp-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span class="dp-label">Deadline</span>
+                </button>
+                <button type="button" class="dp-clear-btn" title="Hapus deadline" tabindex="-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <div class="dp-popup" role="dialog">
+                <div class="dp-header">
+                    <button type="button" class="dp-nav dp-prev" aria-label="Bulan sebelumnya">‹</button>
+                    <span class="dp-month-year"></span>
+                    <button type="button" class="dp-nav dp-next" aria-label="Bulan berikutnya">›</button>
+                </div>
+                <div class="dp-weekdays">
+                    <span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span>
+                </div>
+                <div class="dp-days"></div>
+                <div class="dp-footer">
+                    <button type="button" class="dp-today">🍡 Hari ini</button>
+                    <button type="button" class="dp-clear">Hapus</button>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-add">+ Tambah</button>
+    </form>
+
+    <ul class="todo-list">
+        {% for todo in todos %}
+        <li class="todo-item {% if todo['done'] %}done{% endif %}">
+            <a href="{{ url_for('toggle', todo_id=todo['id']) }}" class="check-circle" title="Tandai selesai / belum">
+                {% if todo['done'] %}✓{% endif %}
+            </a>
+
+            <div class="todo-body">
+                <span class="todo-text">{{ todo['task'] }}</span>
+                {% if todo['due_date_display'] %}
+                <span class="deadline-badge badge-{{ todo['status'] }}">
+                    {% if todo['status'] == 'overdue' %}⏰ Terlambat &middot; {{ todo['due_date_display'] }}
+                    {% elif todo['status'] == 'today' %}📅 Hari ini
+                    {% else %}📅 {{ todo['due_date_display'] }}
+                    {% endif %}
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="todo-actions">
+                <a href="{{ url_for('edit', todo_id=todo['id']) }}" class="icon-btn edit-btn" title="Edit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </a>
+                <a href="{{ url_for('delete', todo_id=todo['id']) }}" class="icon-btn delete-btn" title="Hapus" onclick="return confirm('Hapus tugas ini?');">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                </a>
+            </div>
+        </li>
+        {% else %}
+        <li class="empty-state">
+            <span>🌱</span>
+            <p>Belum ada tugas. Tambahkan satu di atas!</p>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <footer class="app-footer">
+        <p>Dibuat dengan Flask + SQLite &middot; {{ tahun }}</p>
+    </footer>
+</div>
+{% endblock %}

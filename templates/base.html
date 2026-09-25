@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}To-Do List{% endblock %} 🍵💗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="blob blob-pink"></div>
+    <div class="blob blob-matcha"></div>
+
+    <div class="wrapper">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/datepicker.js') }}"></script>
+</body>
+</html>
